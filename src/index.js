@@ -7,7 +7,11 @@ import { createStore } from 'redux'
 import reducer from './reducers'
 
 // invoke createStore with the imported reducer to create the Redux store
-const store = createStore(reducer)
+// second parameter is required to use the Redux Devtools Extension
+const store = createStore(
+  reducer,
+  window.__REDUX_DEVTOOLS_EXTENSION__  && window.__REDUX_DEVTOOLS_EXTENSION__()
+)
 
 ReactDOM.render(<App />, document.getElementById('root'));
 registerServiceWorker();
