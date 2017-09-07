@@ -23,7 +23,7 @@ function mapDispatchToProps(dispatch) {
   }
 }
 
-function mapStateToProps(calendar) {
+function mapStateToProps({ calendar, food }) {
   // map the calendar object to an array, React needs arrays to map into a grid, redux likes the object data shape
   const dayOrder =  ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
 
@@ -31,7 +31,7 @@ function mapStateToProps(calendar) {
     calendar: dayOrder.map((day) => ({
       day,
       meals: Object.keys(calendar[day]).reduce((meals, meal) => {
-        meals[meal] = calendar[day][meal]
+        meals[meal] = food[calendar[day][meal]]
           ? calendar[day][meal]
           : null
 
