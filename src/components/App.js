@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import logo from '../logo.svg'
 import { connect } from 'react-redux'
 import { addRecipe, removeFromCalendar } from '../actions'
 import { capitalize } from '../utils/helpers'
@@ -9,6 +8,7 @@ import ArrowRightIcon from 'react-icons/lib/fa/arrow-circle-right'
 import Loading from 'react-loading'
 import { fetchRecipes } from '../utils/api'
 import FoodList from './FoodList'
+import ShoppingList from './ShoppingList'
 
 class App extends Component {
 
@@ -18,6 +18,7 @@ class App extends Component {
     day: null,
     food: null,
     loadingFood: false,
+    ingredientsModalOpen: false,
   }
 
   openFoodModal = ({ meal, day }) => {
@@ -52,14 +53,34 @@ class App extends Component {
       })))
   }
 
+  openIngredientsModal = () => this.setState(() => ({ ingredientsModalOpen: true }))
+  closeIngredientsModal = () => this.setState(() => ({ ingredientsModalOpen: false }))
+  generateShoppingList = () => {
+    return this.props.calendar.reduce((result, { meals }) => {
+      const { breakfast, lunch, dinner } = meals
+
+      breakfast && result.push(breakfast)
+      lunch && result.push(lunch)
+      dinner && result.push(dinner)
+
+      return result
+    }, [])
+    .reduce((ings, { ingredientLines }) => ings.concat(ingredientLines), [])
+  }
+
   render() {
-    const { foodModalOpen, loadingFood, food } = this.state
+    const { foodModalOpen, loadingFood, food, ingredientsModalOpen } = this.state
     const { calendar, remove, selectRecipe } = this.props
     const mealOrder = ['breakfast', 'lunch', 'dinner']
-
-    console.log('calendar', this.props.calendar)
+    console.log(this.props)
     return (
       <div className='container'>
+        <div className='nav'>
+          <h1 className='header'>UdaciMeals</h1>
+          <button className='shopping-list' onClick={this.openIngredientsModal}>
+            Shopping List
+          </button>
+        </div>
         <ul className='meal-types'>
           {mealOrder.map((mealType) => (
             <li key={mealType} className='subheader'>
@@ -129,20 +150,22 @@ class App extends Component {
                   </div>}
             </div>
           </Modal>
+          <Modal
+          className='modal'
+          overlayClassName='overlay'
+          isOpen={ingredientsModalOpen}
+          onRequestClose={this.closeIngredientsModal}
+          contentLabel='Modal'
+        >
+          {ingredientsModalOpen && <ShoppingList list={this.generateShoppingList()}/>}
+        </Modal>
 
       </div>
     );
   }
 }
 
-function mapDispatchToProps(dispatch) {
-  return {
-    selectRecipe: (data) => dispatch(addRecipe(data)),
-    remove: (data) => dispatch(addRecipe(data)),
-  }
-}
-
-function mapStateToProps({ calendar, food }) {
+function mapStateToProps({ food, calendar }) {
   // map the calendar object to an array, React needs arrays to map into a grid, redux likes the object data shape
   const dayOrder =  ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
 
@@ -150,13 +173,20 @@ function mapStateToProps({ calendar, food }) {
     calendar: dayOrder.map((day) => ({
       day,
       meals: Object.keys(calendar[day]).reduce((meals, meal) => {
-        meals[meal] = food[calendar[day][meal]]
-          ? calendar[day][meal]
+        meals[meal] = calendar[day][meal]
+          ? food[calendar[day][meal]]
           : null
 
       return meals
       }, {})
     }))
+  }
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    selectRecipe: (data) => dispatch(addRecipe(data)),
+    remove: (data) => dispatch(removeFromCalendar(data)),
   }
 }
 
