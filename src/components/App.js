@@ -72,7 +72,6 @@ class App extends Component {
     const { foodModalOpen, loadingFood, food, ingredientsModalOpen } = this.state
     const { calendar, remove, selectRecipe } = this.props
     const mealOrder = ['breakfast', 'lunch', 'dinner']
-    console.log(this.props)
     return (
       <div className='container'>
         <div className='nav'>
